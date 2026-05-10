@@ -1,5 +1,8 @@
 import os
-import json, codecs, time
+import sys
+import json
+import codecs
+import time
 
 dataDir = "src/data/"
 bibFile = "bib/references.bib"
@@ -21,60 +24,66 @@ def parseBibtex(bibFile):
             if line.startswith("@"):
                 currentId = line.split("{")[1].rstrip(",\n")
                 currentType = line.split("{")[0].strip("@ ")
-                parsedData[currentId] = {"type":currentType}
+                parsedData[currentId] = {"type": currentType}
             if currentId != "":
                 if "=" in line:
                     field = line.split("=")[0].strip().lower()
-                    value = line.split("=")[1].strip("} \n").replace("},","").strip()
+                    value = line.split("=")[1].strip("} \n").replace("},", "").strip()
                     if len(value) > 0 and value[0] == "{":
                         value = value[1:]
                     if field in parsedData[currentId]:
-                        parsedData[currentId][field] = parsedData[currentId][field] + " " +value
+                        parsedData[currentId][field] = parsedData[currentId][field] + " " + value
                     else:
                         parsedData[currentId][field] = value
                     lastField = field
                 else:
                     if lastField in parsedData[currentId]:
                         value = line.strip()
-                        value = value.strip("} \n").replace("},","").strip()
-                        if len(value)>0:
-                            parsedData[currentId][lastField] = parsedData[currentId][field] + " " + value
-        fIn.close()
+                        value = value.strip("} \n").replace("},", "").strip()
+                        if len(value) > 0:
+                            parsedData[currentId][lastField] = parsedData[currentId][lastField] + " " + value
     return parsedData
 
+
 def writeJSON(parsedData):
+    os.makedirs(os.path.dirname(bibJsFile), exist_ok=True)
     with codecs.open(bibJsFile, "w", "utf-8-sig") as fOut:
         fOut.write("define({ entries : ")
-        fOut.write(json.dumps(parsedData, sort_keys=True,indent=4, separators=(',', ': ')))
+        fOut.write(json.dumps(parsedData, sort_keys=True, indent=4, separators=(",", ": ")))
         fOut.write("});")
-        fOut.close()
+
 
 def listAvailablePdf():
-    #papersDirWin = papersDir.replace("/", "\\")
-    fOut = open(availablePdfFile, "w")
+    os.makedirs(papersDir, exist_ok=True)
+    fOut = open(availablePdfFile, "w", encoding="utf-8")
     s = "define({availablePdf: ["
     count = 0
     for file in os.listdir(papersDir):
         if file.endswith(".pdf"):
-            s+= "\""+file.replace(".pdf","")+"\","
+            s += "\"" + file.replace(".pdf", "") + "\","
             count += 1
     if count > 0:
-        s = s[:len(s) - 1]
-    s+= "]});"
+        s = s[: len(s) - 1]
+    s += "]});"
     fOut.write(s)
-    
+    fOut.close()
+
+
 def listAvailableImg():
-    fOut = open(availableImgFile, "w")
+    os.makedirs(papersImgDir, exist_ok=True)
+    fOut = open(availableImgFile, "w", encoding="utf-8")
     s = "define({ availableImg: ["
     count = 0
     for file in os.listdir(papersImgDir):
         if file.endswith(".png"):
-            s+= "\""+file.replace(".png","")+"\","
+            s += "\"" + file.replace(".png", "") + "\","
             count += 1
     if count > 0:
-        s = s[:len(s) - 1]
-    s+= "]});"
+        s = s[: len(s) - 1]
+    s += "]});"
     fOut.write(s)
+    fOut.close()
+
 
 def update():
     print("convert bib file")
@@ -85,13 +94,22 @@ def update():
     listAvailableImg()
     print("done")
 
-prevBibTime = 0
-while True:
-    currentBibTime = os.stat(bibFile).st_mtime
-    if (prevBibTime != currentBibTime):
-        print("detected change in bib file")
-        update()
-        prevBibTime = currentBibTime
+
+def watch_loop():
+    prevBibTime = 0
+    while True:
+        currentBibTime = os.stat(bibFile).st_mtime
+        if prevBibTime != currentBibTime:
+            print("detected change in bib file")
+            update()
+            prevBibTime = currentBibTime
+        else:
+            print("waiting for changes in bib file: " + bibFile)
+        time.sleep(1)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--watch":
+        watch_loop()
     else:
-        print("waiting for changes in bib file: "+bibFile)
-    time.sleep(1);
+        update()

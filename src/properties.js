@@ -2,7 +2,7 @@
  * Name as used as title for the main page
  * @type {string}
  */
-var title = 'COMP4037 CW3 — Insider risk & human factors literature';
+var title = 'Insider threat, security culture & phishing — bibliography';
 
 /**
  * Relative path to the data directory
@@ -54,16 +54,14 @@ var editable = false;
  * @type {{html: string, id: string}}
  */
 var paper = {
-    html: 'COMP4037 Research Methods — literature browser (built with <b><a href="https://github.com/fabian-beck/survis" target="_blank">SurVis</a></b>; cite Beck et al., 2016).',
+    html: 'Built with <b><a href="https://github.com/fabian-beck/survis" target="_blank">SurVis</a></b>; cite Beck et al., TVCG 2016.',
     id: 'Beck2016Visual'
 };
 
 /**
  * Extra pages like an about page that will be listed in the footer an can be opened on demand (page name -> path)
  */
-var extraPages = {
-    'about': 'about.html'
-};
+var extraPages = {};
 
 /**
  * Custom style as path to an extra css file (leave empty if not applicable)

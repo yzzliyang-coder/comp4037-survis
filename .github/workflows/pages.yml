@@ -1,6 +1,3 @@
-# Static SurVis site → GitHub Pages (two-job pattern, official docs).
-# Pages: Settings → Build and deployment → Source: GitHub Actions
-
 name: Deploy SurVis to GitHub Pages
 
 on:
